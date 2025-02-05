@@ -4,7 +4,7 @@ class EnglishTeacherBot:
     def __init__(self, api_key):
         self.client = OpenAI(
             api_key=api_key,
-            base_url="https://api.deepseek.com"
+            base_url="https://api.deepseek.com/v1"
         )
         self.messages = [
             {
@@ -42,17 +42,23 @@ Remember to maintain a friendly and encouraging tone throughout the conversation
         ]
     
     def chat(self, user_message):
-        self.messages.append({"role": "user", "content": user_message})
-        
-        response = self.client.chat.completions.create(
-            model="deepseek-chat",
-            messages=self.messages
-        )
-        
-        assistant_message = response.choices[0].message
-        self.messages.append(assistant_message)
-        
-        return assistant_message.content
+        try:
+            self.messages.append({"role": "user", "content": user_message})
+            
+            response = self.client.chat.completions.create(
+                model="deepseek-chat",
+                messages=self.messages,
+                temperature=0.7,
+                max_tokens=2000
+            )
+            
+            assistant_message = response.choices[0].message
+            self.messages.append({"role": "assistant", "content": assistant_message.content})
+            
+            return assistant_message.content
+        except Exception as e:
+            raise Exception(f"API Error: {str(e)}")
     
     def clear_history(self):
+        """Clear the conversation history except system message"""
         self.messages = self.messages[:1] 
