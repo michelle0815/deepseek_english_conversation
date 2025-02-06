@@ -1,10 +1,15 @@
 from openai import OpenAI
+import httpx
 
 class EnglishTeacherBot:
     def __init__(self, api_key):
         self.client = OpenAI(
             api_key=api_key,
-            base_url="https://api.deepseek.com/v1"
+            base_url="https://api.deepseek.com/v1",
+            http_client=httpx.Client(
+                timeout=60.0,
+                follow_redirects=True
+            )
         )
         self.messages = [
             {
